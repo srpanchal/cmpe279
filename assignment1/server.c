@@ -6,8 +6,10 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <pwd.h>
+#include <sys/wait.h>
 
-#define PORT 80
+#define PORT 8080
 int main(int argc, char const *argv[])
 {
     int server_fd, new_socket, valread;
@@ -27,7 +29,7 @@ int main(int argc, char const *argv[])
         exit(EXIT_FAILURE);
     }
 
-    // Attaching socket to port 80
+    // Attaching socket to port 8080
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
                                                   &opt, sizeof(opt)))
     {
@@ -56,9 +58,21 @@ int main(int argc, char const *argv[])
         perror("accept");
         exit(EXIT_FAILURE);
     }
-    valread = read( new_socket , buffer, 1024);
-    printf("%s\n",buffer );
-    send(new_socket , hello , strlen(hello) , 0 );
-    printf("Hello message sent\n");
+    
+    struct passwd* pwd;
+    pid_t child_pid, wpid;
+    int status = 0;
+    if((child_pid = fork())== 0){
+	if((pwd = getpwnam("nobody")) == NULL){
+		perror("User nobody not found");
+	}
+	setuid(pwd->pw_uid);
+    	valread = read( new_socket , buffer, 1024);
+   	printf("%s\n",buffer );
+    	send(new_socket , hello , strlen(hello) , 0 );
+    	printf("Hello message sent\n");
+	exit(0);
+    }
+    while((wpid = wait(&status)) > 0);
     return 0;
 }

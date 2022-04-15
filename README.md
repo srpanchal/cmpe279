@@ -1,6 +1,4 @@
-# CMPE 279
+# CMPE 279 Assignments
 
-## Assignment 1 : Privilege Separation
-
-Team:
+Name:
 Saurabh Rajeshkumar Panchal (015219971)
